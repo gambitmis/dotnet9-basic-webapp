@@ -1,14 +1,35 @@
-version: '3.8'
-
+name: invoiceapp
 services:
   invoiceapp:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: invoiceapp
+    #image: invoiceapp:dev
     ports:
       - "80:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    #volumes:
-    #  - ./appsettings.json:/app/appsettings.json
-    #  - ./appsettings.Development.json:/app/appsettings.Development.json
+      - MSSQL_CONN=Server=mssql,1433;Database=invoice;User Id=sa;Password=qwER1234asdf;TrustServerCertificate=True;
+  mssql:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    container_name: mssql
+    environment:
+      SA_PASSWORD: "qwER1234asdf"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+      - mssql-backup:/var/opt/mssql/backup
+    restart: unless-stopped
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "qwER1234asdf" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+volumes:
+  mssql-data:
+  mssql-backup:

@@ -10,6 +10,14 @@ namespace InvoiceApp.Services
         }
 
         public DbSet<Invoice> Invoices { get; set; } = null!;
-    }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
 
+            // Add any additional configuration here
+            modelBuilder.Entity<Invoice>()
+                .Property(p => p.UnitPrice)
+                .HasPrecision(16, 2);
+        }
+    }
 }
